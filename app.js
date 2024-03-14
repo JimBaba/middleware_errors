@@ -4,7 +4,21 @@ const AppError = require('./AppError')
 const app = express()
 
 
+// FUNCTIONS
+
+const verify = (req,res,next) => {
+     console.log(req.query.password)
+    if(req.query.password === "MyPass"){
+        next()
+    } 
+    throw new AppError("Unauthorized!", 403)
+}
+
+// FUNCTIONS END
+
+
 // MIDDLEWARE
+
 // app.use(morgan('dev'))
 app.use((req,res,next) => {
     req.requestTime = Date.now()
@@ -19,36 +33,16 @@ app.use('/dogs', (req,res,next) => {
 
 // MIDDLEWARE END
 
-// EROOR HANDLING START
 
-app.use((err,req,res,next) => {
-    console.log("***********************************************")
-    console.log("********************ERROR**********************")
-    console.log("***********************************************")
-    console.log(err)
-    next(err)
-})
-
-// EROOR HANDLING END
-
-// FUNCTIONS
-const verify = (req,res,next) => {
-     
-    if(req.query.password === "myPass"){
-        next()
-    } 
-    throw new AppError("You need a password!!!!", 401)
-}
-
-// FUNCTIONS ENd
-
-app.listen('3000', () => {
-    console.log("Listening")
-})
+// PATHING START
 
 app.get('/', (req,res) => {
     console.log(`Request Time: ${req.requestTime}`)
     res.send("Homepage")
+})
+
+app.get('/error', (req,res) => {
+    dog.bark()
 })
 
 app.get('/dogs', (req,res) => {
@@ -59,6 +53,26 @@ app.get('/secret', verify, (req,res) => {
     res.send("my secret page")
 })
 
-app.use((req,res) => {
-    res.status(404).send("NOT FOUND")
+// PATHING END
+
+// ERROR HANDLING START
+
+// app.use((err,req,res,next) => {
+//     console.log("***********************************************")
+//     console.log("********************ERROR**********************")
+//     console.log("***********************************************")
+//     console.log(err)
+//     next(err)
+// })
+
+app.use((err, req, res, next) => {
+    const { status = 500, message = 'Something went wrong!' } = err
+    res.status(status).send(message)
 })
+
+// ERROR HANDLING END
+
+app.listen('3000', () => {
+    console.log("Listening")
+})
+
